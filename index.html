@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
+  <link rel="shortcut icon" href="//assets.piliapp.com/s3pxy/random/wheel/favicon.ico">
+  <title>Ruleta Valerihe</title>
+  <style>
+body {
+  font-family: 'Patrick Hand', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+
+  background-image: url(image/fondo-rul-val.png);
+  background-repeat: repeat;
+  background-size: 50%;
+}
+
+
+    .ruleta-container {
+      position: relative;
+      display: inline-block;
+      width: 540px;
+      height: 540px;
+      margin: 50px;
+      
+    }
+
+    #wheel {
+      width: 540px;
+      height: 540px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition-duration: 10s;
+      transition-timing-function: cubic-bezier(0.6, 0, 0, 1);
+      transform: rotate(0deg);
+      display: block;
+    }
+
+    #wheel-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 540px;
+      height: 540px;
+      background: #000;
+      border-radius: 50%;
+      box-shadow: 1px 1px 3px rgba(50, 50, 50, 0.75);
+      z-index: 0;
+    }
+
+    /* Pin fijo (flecha) - en este ejemplo está a la derecha apuntando hacia el centro */
+    #wheel-pin {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateX(30%) translateY(-50%) rotate(90deg) scaleX(.7);
+      font-size: 48px;
+      color: red;
+      z-index: 100;
+      text-shadow: 2px -2px 2px #969696;
+      pointer-events: none;
+    }
+
+    /* Centro decorativo */
+    #wheel-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2em;
+      height: 2em;
+      border-radius: 1em;
+      background: #fff;
+      z-index: 100;
+      box-shadow: 1px 1px 3px rgba(50,50,50,0.75);
+      pointer-events: none;
+    }
+
+    /* Overlay */
+    #overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px); /* efecto de fondo difuminado */
+    }
+
+    #overlayContent {
+   background: linear-gradient(145deg, #3f72ff, #1e1e2f);
+  padding: 25px 30px;
+  border-radius: 15px;
+  width: 450px;
+  max-height: 80%;
+  overflow-y: auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-family: 'Patrick Hand', cursive;
+  text-align: center;
+  position: relative;
+    }
+#overlayContent h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #ffea00;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+}
+    /* Lista de recompensas */
+#listaOpciones .opcion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  background: rgba(255,255,255,0.05);
+  padding: 8px 10px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 5px rgba(255,255,255,0.1);
+}
+
+
+ /* Inputs */
+#listaOpciones input,
+.agregarRecompensa input {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  font-size: 20px;
+  font-family: 'Patrick Hand', cursive;
+}
+#listaOpciones input[type="number"],
+.agregarRecompensa input[type="number"] {
+  width: 60px;
+  text-align: center;
+}
+
+/* Botón cerrar */
+.btnCerrar {
+  margin-top: 20px;
+  background: #ff007f;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.1s ease-in-out;
+}
+.btnCerrar:hover {
+  transform: scale(1.05);
+  background: #ff4c9e;
+}
+ /* Botones de borrar */
+#listaOpciones .borrarBtn {
+  background: #ff4c4c;
+  border: none;
+  color: #fff;
+  padding: 4px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out;
+}  
+/* Scroll personalizado */
+#overlayContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+#overlayContent::-webkit-scrollbar-thumb {
+  background: #ffea00;
+  border-radius: 4px;
+}
+
+#overlayContent::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+} 
+.agregarRecompensa input[type="text"] {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.agregarRecompensa input[type="number"] {
+  width: 60px;
+  margin-right: 10px;
+}
+
+.agregarRecompensa button {
+  background: #00ffea;
+  border: none;
+  color: #000;
+  padding: 6px 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.1s ease-in-out;
+}
+
+.agregarRecompensa button:hover {
+  transform: scale(1.05);
+  background: #00ffcc;
+}
+
+#listaOpciones .borrarBtn:hover {
+  transform: scale(1.1);
+  background: #ff0000;
+}
+
+
+    .rulale {
+    font-size: 48px;      /* tamaño del texto */
+    text-align: center;   /* centrado */
+          /* espacio arriba y abajo */
+   
+  }
+  *, ::after, ::before {
+    box-sizing: border-box;
+}
+  
+.logo {
+  display: block;
+  margin: 50px auto 30px auto; /* espacio arriba y abajo */
+  width: 420px; /* ajusta a gusto */
+  position: relative; /* NO absolute */
+  z-index: 5;
+  pointer-events: none;
+}
+
+
+
+ #spin-btn {
+    position: absolute;
+    text-align: center;
+    line-height: 100%;
+    z-index: 300;
+    background: #000;
+    opacity: .5;
+    border-radius: 1rem;
+    color: #fff;
+    font-size: 2rem;
+    top: 50%;
+    left: 50%;
+    display: inline-block;
+    padding: 1rem;
+    transform: translateY(-50%) translateX(-50%);
+    width: 50%;
+    cursor: pointer;
+}
+.rulale, #resultado {
+  position: absolute;
+  top: 23%;          /* centro vertical */
+  left: 50%;         /* centro horizontal */
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 200;      /* encima de la ruleta */
+}
+
+#resultado {
+  display: none;     /* inicialmente oculto */
+  background: rgba(0,0,0,0.7);
+  width: 700px;
+  border-radius: 5px;
+  
+ padding: 5px 18px;  
+  font-size: 34px;
+  flex-direction: row;
+  
+}
+#resultado button {
+  background: white;
+border: solid;
+  color: black;
+  padding: 0px 10px;       /* más pequeño */
+  font-size: 16px;        /* opcional, que sea más pequeño */
+  border-radius: 4px;
+  border-width: 2px;
+  cursor: pointer;
+  justify-content: center;
+  border-color: #000;
+  font-weight: bold;
+
+}
+
+#resultado span {
+  flex: 1;
+  text-align: center;
+
+}
+
+#wheel{
+   pointer-events: none;
+}
+
+
+
+
+
+
+
+  </style>
+</head>
+<body>
+
+<div class="rulale"></div>
+  <img src="image/ruletahelogo.gif" alt="ruleta.vale" class="logo" >
+  
+
+
+
+<div id="resultado">
+ <div><img src="image/fullsize1.png" alt=""></div>
+  <span id="resultadoText"></span>
+ <div><img src="image/fullsize.png" alt=""></div>
+</div> <br>
+
+</div>
+  <div class="ruleta-container">
+    <div id="wheel-bg"></div>
+    <canvas id="wheel" width="540" height="540"></canvas>
+    <span id="wheel-pin">▼</span>
+    <span id="wheel-center"></span>
+    <button id="spin-btn">GIRAR</button>
+  </div>
+
+
+  <!-- Overlay -->
+  <div id="overlay">
+   <div id="overlayContent">
+  <h2>🎁 Editar Recompensas</h2>
+  
+  <div id="listaOpciones"></div>
+
+  <div class="agregarRecompensa">
+    <input type="text" id="nuevaRecompensa" placeholder="Nombre de la recompensa">
+    <input type="number" id="porcentajeRecompensa" placeholder="%" min="1" max="100">
+    <button id="agregarRecompensa">Agregar</button>
+  </div>
+
+  <button id="cerrarOverlay" class="btnCerrar">Cerrar</button>
+</div>
+
+
+    </div>
+  </div>
+
+  <script>
+    const inputNueva = document.getElementById('nuevaRecompensa');
+const inputPorcentaje = document.getElementById('porcentajeRecompensa');
+const btnAgregar = document.getElementById('agregarRecompensa');
+
+btnAgregar.addEventListener('click', () => {
+  const nombre = inputNueva.value.trim();
+  const porcentaje = parseInt(inputPorcentaje.value);
+
+  if(!nombre || isNaN(porcentaje) || porcentaje < 1 || porcentaje > 100){
+    alert("Ingresa un nombre y porcentaje válido");
+    return;
+  }
+
+  opciones.push({ nombre, porcentaje });
+  guardarOpciones();
+  renderOpciones();
+  dibujarRuleta();
+
+  inputNueva.value = '';
+  inputPorcentaje.value = '';
+});
+
+    let girando = false;
+
+
+const bellSound = new Audio("//cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/bell_ring.mp3");
+bellSound.volume= 0.15;
+
+function mostrarResultado(opcion) {
+  bellSound.play()
+  const resDiv = document.getElementById("resultado");
+  const resText = document.getElementById("resultadoText");
+  const rulale = document.querySelector(".rulale");
+
+  // Ocultamos título
+  if (rulale) rulale.style.display = "none";
+
+  // Mostramos resultado
+  resDiv.style.display = "flex";
+  resText.textContent = opcion.nombre;
+  resDiv.style.background = opcion.color || "rgba(0,0,0,0.7)";
+}
+
+function cerrarResultado() {
+  const resDiv = document.getElementById("resultado");
+  const rulale = document.querySelector(".rulale");
+
+  // Ocultamos resultado
+  resDiv.style.display = "none";
+
+  // Mostramos título
+  if (rulale) rulale.style.display = "block";
+}
+
+
+
+
+
+
+const spinBtn = document.getElementById("spin-btn");
+
+spinBtn.addEventListener("click", () => {
+  // Ocultamos resultado anterior si existe
+  document.getElementById("resultado").style.display = "none";
+
+  // Mostramos el título mientras gira
+  const rulale = document.querySelector(".rulale");
+  if (rulale) rulale.style.display = "block";
+
+  // Ocultamos el botón
+  spinBtn.style.display = "none";
+
+  // Llamamos al giro
+  girarRuleta();
+
+  // Suponiendo que la ruleta tarda 5 segundos en girar
+  setTimeout(() => {
+    // Mostramos el botón cuando termina
+    spinBtn.style.display = "block";
+  }, 10000); // Ajusta este tiempo según la duración real del giro
+});
+
+function dibujarBordeRGB(time) {
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const r = canvas.width / 2 + 2;
+
+  const colores = ["red","yellow","lime","cyan","blue","magenta"];
+  const speed = -time / 200; // negativo = sentido contrario, más rápido
+
+  ctx.save();
+  ctx.lineWidth = 20;
+  ctx.shadowBlur = 25;
+  ctx.shadowColor = "white";
+  ctx.globalAlpha = 0.5 + 0.5 * Math.sin(time / 100); // parpadeo
+
+  colores.forEach((color, i) => {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.arc(
+      cx,
+      cy,
+      r,
+      speed + i * Math.PI / 3,
+      speed + (i + 1) * Math.PI / 3
+    );
+    ctx.stroke();
+  });
+
+  ctx.restore();
+}
+
+
+
+function girarRuleta() {
+  girando = true;
+
+  // -----------------------------
+  // Elegir índice según porcentaje con chequeo de 100%
+  // -----------------------------
+  function elegirSegunPorcentaje(opciones) {
+    // Primero chequea si hay alguna opción con porcentaje 100%
+    const opcionCien = opciones.find(o => o.porcentaje === 100);
+    if (opcionCien) {
+      return opciones.indexOf(opcionCien);
+    }
+
+    // Si no hay opción 100%, elegir según porcentajes normales
+    const total = opciones.reduce((sum, o) => sum + o.porcentaje, 0);
+    let rnd = Math.random() * total;
+    for (let i = 0; i < opciones.length; i++) {
+      if (rnd < opciones[i].porcentaje) return i;
+      rnd -= opciones[i].porcentaje;
+    }
+    return opciones.length - 1; // fallback
+  }
+
+  const ganadorIndex = elegirSegunPorcentaje(opciones);
+  const elegido = opciones[ganadorIndex];
+
+  // -------------------------------------------------
+  // Resto del código igual para animar la ruleta
+  // -------------------------------------------------
+  const drawStart = -Math.PI / 2;
+  const sliceAngle = (2 * Math.PI) / opciones.length;
+  const targetCenter = drawStart + ganadorIndex * sliceAngle + sliceAngle / 2;
+  const pointerAngle = 0; // pin a la derecha
+  const vueltas = 5;
+  let delta = pointerAngle - (currentRotation + targetCenter);
+  delta = ((delta % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+  const endRotation = currentRotation + vueltas * 2 * Math.PI + delta;
+
+  const slices = [];
+  for (let i = 0; i < opciones.length; i++) {
+    slices.push(drawStart + i * sliceAngle);
+  }
+
+  const spinDuration = 10000;
+  const start = performance.now();
+  let lastAngle = currentRotation % (2 * Math.PI);
+
+  document.querySelector(".rulale").style.display = "block";
+
+  function animate(now) {
+    const elapsed = now - start;
+    const t = Math.min(elapsed / spinDuration, 1);
+    const easeOut = 1 - Math.pow(1 - t, 3);
+    const angle = currentRotation + (endRotation - currentRotation) * easeOut;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(angle);
+    ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    dibujarRuleta();
+    ctx.restore();
+
+    // ticks de sonido
+    const relative = (angle + pointerAngle) % (2 * Math.PI);
+    const prev = (lastAngle + pointerAngle) % (2 * Math.PI);
+
+    for (let s of slices) {
+      const normS = ((s % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      if (prev < normS && relative >= normS) {
+        tickSound.currentTime = 0;
+        tickSound.play();
+      }
+    }
+    lastAngle = angle % (2 * Math.PI);
+    if (girando) dibujarBordeRGB(now);
+    if (t < 1) {
+      
+      requestAnimationFrame(animate);
+    } else {
+       ctx.clearRect(0, 0, canvas.width, canvas.height);
+        dibujarRuleta();
+      girando = false;
+      document.querySelector(".rulale").style.display = "none";
+      mostrarResultado({
+        nombre: elegido.nombre,
+        color: coloresBase[ganadorIndex % coloresBase.length]
+      });
+    }
+  }
+  requestAnimationFrame(animate);
+
+
+}
+
+
+
+
+    const canvas = document.getElementById('wheel');
+    const ctx = canvas.getContext('2d');
+    const coloresBase = ["#ff0000","#ff7e00","#ffea00","#48ff00","#00fffc","#3842c7","#9f00fa","#f584cc"];
+  let opciones = [
+ 
+];
+// Mostrar la primera opción desde el inicio
+
+ function dibujarRuleta() {
+  let startAngle = -Math.PI/2; // empieza desde arriba
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const sliceAngle = (2 * Math.PI) / opciones.length; // todos iguales
+
+  opciones.forEach((o, i) => {
+    const endAngle = startAngle + sliceAngle;
+    const color = coloresBase[i % coloresBase.length];
+
+    // sector
+    ctx.beginPath();
+    ctx.moveTo(canvas.width/2, canvas.height/2);
+    ctx.arc(canvas.width/2, canvas.height/2, canvas.width/2, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    // --- TEXTO centrado ---
+    ctx.save();
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(startAngle + sliceAngle/2);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#000";
+    ctx.lineWidth = 2;  
+    ctx.shadowColor = "rgba(0,0,0,0.6)";
+    ctx.shadowBlur = 52;
+    ctx.stroke();
+
+    let maxWidth = canvas.width/2 - 20;
+    let fontSize = 30; // fijo para que todos se vean iguales
+    ctx.font = ` ${fontSize}px Patrick Hand`;
+    ctx.fillText(o.nombre, canvas.width/2 - 10, 5);
+
+    ctx.restore();
+    // ----------------------
+
+    startAngle = endAngle;
+  });
+}
+
+
+    // ------------ Manejo del giro y selección correcta según el pin fijo ------------
+    // Ajusta esto si tu pin está en otra posición:
+    // - Si tu pin está a la derecha (como en el CSS actual): pointerAngleDeg = 0
+    // - Si tu pin está arriba: pointerAngleDeg = 270
+    // - Si tu pin está a la izquierda: pointerAngleDeg = 180
+    // - Si tu pin está abajo: pointerAngleDeg = 90
+    const pointerAngleDeg = 0; // aquí pones 0 porque tu #wheel-pin está a la derecha
+let currentRotation = 0; // rotación acumulada
+const tickSound = new Audio("//cdnjs.cloudflare.com/ajax/libs/blockly/1.0.0/media/disconnect.mp3");
+
+canvas.addEventListener('click', () => {
+  const ganadorIndex = Math.floor(Math.random() * opciones.length);
+  const elegido = opciones[ganadorIndex];
+
+  const drawStart = -Math.PI / 2;
+  const sliceAngle = (2 * Math.PI) / opciones.length;
+  const targetCenter = drawStart + ganadorIndex * sliceAngle + sliceAngle / 2;
+
+  const pointerAngle = 0; // pin a la derecha
+
+  const vueltas = 5;
+  let delta = pointerAngle - (currentRotation + targetCenter);
+  delta = ((delta % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+  const endRotation = currentRotation + vueltas * 2 * Math.PI + delta;
+
+  // preparamos bordes de cada sector
+  const slices = [];
+  for (let i = 0; i < opciones.length; i++) {
+    slices.push(drawStart + i * sliceAngle);
+  }
+
+  const spinDuration = 5000;
+  const start = performance.now();
+  let lastAngle = currentRotation % (2 * Math.PI);
+
+  function animate(now) {
+    const elapsed = now - start;
+    const t = Math.min(elapsed / spinDuration, 1);
+    const easeOut = 1 - Math.pow(1 - t, 3);
+    const angle = currentRotation + (endRotation - currentRotation) * easeOut;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(angle);
+    ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    dibujarRuleta();
+    ctx.restore();
+
+    // --- reproducir tick cuando el pin cruza un borde ---
+    const relative = (angle + pointerAngle) % (2 * Math.PI);
+    const prev = (lastAngle + pointerAngle) % (2 * Math.PI);
+    for (let s of slices) {
+      const normS = ((s % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      if (prev < normS && relative >= normS) {
+        tickSound.currentTime = 0;
+        tickSound.play();
+      }
+    }
+    lastAngle = angle % (2 * Math.PI);
+
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      // en lugar del alert, mostramos el rectángulo
+ // Ocultamos el título solo cuando termina el giro
+    const rulale = document.querySelector(".rulale");
+    if (rulale) rulale.style.display = "none";
+
+    // Mostramos el resultado
+    mostrarResultado({
+      nombre: elegido.nombre,
+      color: coloresBase[ganadorIndex % coloresBase.length]
+    });
+    }
+  }
+  requestAnimationFrame(animate);
+});
+
+
+
+
+    // Overlay (igual que antes)
+    const overlay = document.getElementById('overlay');
+    const cerrarOverlay = document.getElementById('cerrarOverlay');
+    const listaOpciones = document.getElementById('listaOpciones');
+
+    function toggleOverlay(show) {
+      overlay.style.display = show ? "flex" : "none";
+      if (show) renderOpciones();
+      else dibujarRuleta();
+    }
+
+    cerrarOverlay.addEventListener('click', () => toggleOverlay(false));
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === "control") {
+        toggleOverlay(overlay.style.display !== "flex");
+      }
+    });
+
+    // ----- Cargar opciones desde localStorage -----
+opciones = JSON.parse(localStorage.getItem("opciones")) || opciones;
+
+// Guardar opciones en localStorage
+function guardarOpciones() {
+  localStorage.setItem("opciones", JSON.stringify(opciones));
+}
+
+// Renderizar lista con botones de borrar
+function renderOpciones() {
+  listaOpciones.innerHTML = '';
+
+  opciones.forEach((o, i) => {
+    const div = document.createElement('div');
+    div.className = 'opcion';
+    div.innerHTML = `
+      <input type="text" value="${o.nombre}" data-i="${i}" data-type="nombre">
+      <input type="number" value="${o.porcentaje}" min="1" max="100" data-i="${i}" data-type="porcentaje"> %
+      <button data-i="${i}" class="borrarBtn">Borrar</button>
+    `;
+    listaOpciones.appendChild(div);
+  });
+
+  // Actualizar valores en opciones al cambiar input
+  listaOpciones.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const i = e.target.dataset.i;
+      const type = e.target.dataset.type;
+      opciones[i][type] = type === "porcentaje" ? parseInt(e.target.value) : e.target.value;
+      guardarOpciones();
+      dibujarRuleta(); // actualiza la ruleta en tiempo real
+    });
+  });
+
+  // Manejar botón de borrar
+  listaOpciones.querySelectorAll('.borrarBtn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const i = e.target.dataset.i;
+      opciones.splice(i, 1);
+      guardarOpciones();
+      renderOpciones();
+      dibujarRuleta();
+    });
+  });
+}
+
+    // inicial
+    dibujarRuleta();
+    
+  </script>
+</body>
+</html>
